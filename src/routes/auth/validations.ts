@@ -7,19 +7,29 @@ export const loginSchemaValidation = {
   },
 };
 
-export const singupSchemaValidation = {
+export const signUpSchemaValidation = {
   body: {
     email: Joi.string().email().required(),
     password: Joi.string().required(),
     name: Joi.string().required(),
+    coordinates: Joi.array(),
+  },
+};
+
+export const upgradeProfileSchemaValidation = {
+  body: {
     username: Joi.string().required(),
+    avatar: Joi.string().required(),
+    email: Joi.string().required(),
+  },
+};
+
+export const addDefaultLocation = {
+  body: {
+    email: Joi.string().email().required(),
     location: Joi.object({
       type: "Point",
       coordinates: [Number],
-      address: String,
-      description: String,
-    }),
-    active: false,
-    photo: Joi.string(),
+    }).required(),
   },
 };

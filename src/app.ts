@@ -1,13 +1,9 @@
 import express, { Express, Request, Response } from "express";
-import connectDB from "./config/db";
-import dotenv from "dotenv";
 import cors, { CorsOptions } from "cors";
 import { app as appSettings } from "./config";
 import responseExtended from "./middlewares/response";
 import userDetail from "./middlewares/userDetail";
 import api from "./routes";
-
-dotenv.config();
 
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {

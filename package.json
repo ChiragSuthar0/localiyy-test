@@ -5,7 +5,7 @@
 	"main": "lib/index.js",
 	"scripts": {
 		"build": "npx tsc",
-		"dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
+		"dev": "cp ./src/config.env ./lib/config.env && concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
 		"prod": "node lib/index.js",
 		"clean": "rm -rf lib",
 		"generate:keys": "npx ts-node helpers/generator.ts",
@@ -33,6 +33,7 @@
 		"mysql": "^2.18.1",
 		"nodemailer": "^6.9.7",
 		"objection": "^3.0.1",
+		"unique-names-generator": "^4.7.1",
 		"validator": "^13.11.0"
 	},
 	"devDependencies": {

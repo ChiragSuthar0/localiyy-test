@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import AppError from "../utils/appError";
 import catchAsync from "../utils/catchAsync";
 import { signJwt } from "../providers/jwt";
+import { randomUUID } from "crypto";
 
 const createSendToken = (
   userDetails: IUser,
@@ -22,12 +23,9 @@ const createSendToken = (
 
 export const signUpUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { username, password, email, name, photo, location } = req.body;
+    const { password, email, name } = req.body;
 
-    if (username.includes(" "))
-      return new AppError("Username cannot have space between", 400);
-
-    const hashedPassword = await bcrypt.hash(req.body.password, 12);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const existingUser = await User.findOne({ email: email });
 
@@ -35,25 +33,36 @@ export const signUpUser = catchAsync(
       return next(new AppError("Email Taken", 401));
     }
 
-    const existingUsername = await User.findOne({ username: username });
+    const {
+      uniqueNamesGenerator,
+      adjectives,
+      colors,
+      animals,
+    } = require("unique-names-generator");
 
-    if (existingUsername) {
-      return next(new AppError("Username Taken", 401));
-    }
+    const shortName = uniqueNamesGenerator({
+      dictionaries: [adjectives, animals, colors],
+      length: 2,
+    });
 
     const newUser = await User.create({
       name: name,
-      username: username,
+      username: shortName,
       email: email,
       password: hashedPassword,
-      location: location,
-      active: false,
-      photo: photo,
+      active: true,
+      location: {
+        type: "Point",
+        coordinates: req.body.coordinates ?? [72.57094444, 23.02666667],
+      },
       role: "user",
       createdAt: Date.now(),
     });
 
-    createSendToken(newUser, 201, req.body.rememberMe ?? false, res);
+    res.status(201).json({
+      status: "success",
+      newUser,
+    });
   }
 );
 
@@ -70,5 +79,53 @@ export const loginUser = catchAsync(
     } else {
       return next(new AppError("Incorrect Password or Username", 403));
     }
+  }
+);
+
+export const completeProfile = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { username, avatar, email } = req.body;
+
+    if (username.includes(" "))
+      return new AppError("Username cannot have space between", 400);
+
+    const existingUsername = await User.findOne({ username: username });
+
+    if (existingUsername) {
+      return next(new AppError("Username Taken", 401));
+    }
+
+    const existingUser = await User.findOneAndUpdate(
+      { email: email },
+      {
+        username: username,
+        avatar: avatar,
+      }
+    );
+
+    if (existingUser) {
+      res.status(200).json({
+        status: "success",
+        existingUser,
+      });
+    }
+  }
+);
+
+export const addDefaultLocation = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { email, location } = req.body;
+
+    const existingUser = await User.findOneAndUpdate(
+      { email: email },
+      {
+        location: location,
+      }
+    );
+
+    res.status(200).json({
+      status: "success",
+      existingUser,
+    });
   }
 );

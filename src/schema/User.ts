@@ -48,7 +48,8 @@ const userSchema = new mongoose.Schema<IUser>({
   },
   avatar: {
     type: String,
-    default: "default.jpg",
+    default:
+      "https://pwco.com.sg/wp-content/uploads/2020/05/Generic-Profile-Placeholder-v3.png",
   },
   role: {
     type: String,
@@ -68,8 +69,6 @@ const userSchema = new mongoose.Schema<IUser>({
       enum: ["Point"],
     },
     coordinates: [Number],
-    address: String,
-    description: String,
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
